@@ -425,6 +425,7 @@ students_collection.create_index([("name", 1), ("group", 1)], unique=True)
 origins = [
     "http://localhost:3000",
     "https://attendance-app-frontend-18592.vercel.app",
+    
     #  "http://localhost:8000",# React app in dev mode
 ]
 
@@ -451,7 +452,23 @@ async def migrate_groups():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    try:
+        # Verifikasi model loaded dengan benar
+        assert model is not None, "Model not loaded"
+        assert model.eval(), "Model not in eval mode"
+        
+        return {
+            "status": "healthy",
+            "model": "loaded",
+            "device": str(device),
+            "port": os.environ.get("PORT", "8000")
+        }
+    except Exception as e:
+        logging.error(f"Health check failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Health check failed: {str(e)}"
+        )
 
 app = FastAPI()
 

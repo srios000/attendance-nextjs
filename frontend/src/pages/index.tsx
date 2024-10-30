@@ -3,7 +3,7 @@ import React from 'react';
 
 const Home: React.FC = () => {
   return (
-    <div className="flex flex-col h-[85vh] bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-800">
+    <div className="flex flex-col h-[90vh] bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-800">
       <main className="flex-grow container mx-auto px-4 py-10">
         <section className="text-center mb-10">
           <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">

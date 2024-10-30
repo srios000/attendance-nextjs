@@ -3,7 +3,6 @@
 old_frontend
 init-mongo.js
 nginx_service
-.github
 other models
 redundant
 /ml_service/__pycache__

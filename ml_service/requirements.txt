@@ -12,5 +12,9 @@ pydantic
 pytz
 python-dateutil
 facenet_pytorch
+scipy
+PyMuPDF
+httpx
+requests
 PyJWT
 gdown

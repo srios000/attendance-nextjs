@@ -201,7 +201,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         console.log('formData', Object.fromEntries(formData));
 
-        const response = await fetch('http://localhost:8000/api/register', {
+        const response = await fetch(process.env.NEXT_PUBLIC_API_URL+'/api/register', {
           method: 'POST',
           body: formData,
         });

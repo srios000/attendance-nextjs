@@ -219,7 +219,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       formData.append('pdf_file', new Blob([fileContent]), pdfFile.originalFilename);
 
       try {
-        const backendResponse = await fetch('http://localhost:8000/api/register_from_pdf', {
+        const backendResponse = await fetch(process.env.NEXT_PUBLIC_API_URL+'/api/register_from_pdf', {
           method: 'POST',
           body: formData,
         });

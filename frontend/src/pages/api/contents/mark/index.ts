@@ -224,7 +224,7 @@ async function recognizeFace(imageData: string): Promise<any> {
   const imageBuffer = Buffer.from(base64Data, 'base64');
   formData.append('image_data', imageBuffer, { filename: 'image.jpg', contentType: 'image/jpeg' });
 
-  const recognizeResponse = await fetch('http://localhost:8000/api/recognize', {
+  const recognizeResponse = await fetch(process.env.NEXT_PUBLIC_API_URL+'/api/recognize', {
     method: 'POST',
     body: formData,
   });
@@ -253,7 +253,7 @@ async function markAttendance(name: string, group: string, imageData: string): P
   formData.append('attended', 'true');
   formData.append('date', new Date().toISOString());
 
-  const markResponse = await fetch('http://localhost:8000/api/mark', {
+  const markResponse = await fetch(process.env.NEXT_PUBLIC_API_URL+'/api/mark', {
     method: 'POST',
     body: formData,
   });

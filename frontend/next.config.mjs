@@ -10,36 +10,6 @@ const nextConfig = {
         // Disable TypeScript during builds
         ignoreBuildErrors: true,
     },
-    async rewrites() {
-        const apiUrl = process.env.NODE_ENV === 'development' 
-            ? 'http://localhost:8000'
-            : process.env.NEXT_PUBLIC_BACKEND_API_URL
-    
-        return [
-            {
-                source: '/api/:slug*',
-                destination: `${apiUrl}/api/:slug*`,
-                missing: [
-                    {
-                        type: 'pathname',
-                        value: '/api/auth/:path*'
-                    }
-                ]
-            },
-            // Separate rule for non-auth routes
-            {
-                source: '/api/:path*',
-                destination: '/api/:path*',
-                has: [
-                    {
-                        type: 'pathname',
-                        value: '/api/auth/:path*'
-                    }
-                ]
-            }
-        ]
-    },
-
 
     images: {
         remotePatterns: [

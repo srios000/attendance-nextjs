@@ -1,0 +1,11 @@
+unusedendpoint
+__pycache__
+.git
+/processed_temp_files/*
+/temp_files/*
+
+debug_images
+
+/images/*
+
+.env

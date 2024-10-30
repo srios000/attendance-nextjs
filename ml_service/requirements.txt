@@ -1,0 +1,16 @@
+torch
+opencv-python
+bson
+fastapi
+python-multipart
+Pillow
+python-dotenv
+bcrypt
+torchvision
+uvicorn
+pydantic
+pytz
+python-dateutil
+facenet_pytorch
+PyJWT
+gdown

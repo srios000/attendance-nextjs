@@ -1,0 +1,17 @@
+/ml_service/password_gen.py
+/ml_service/main_old.py
+old_frontend
+init-mongo.js
+nginx_service
+.github
+other models
+redundant
+/ml_service/__pycache__
+/ml_service/.env
+/frontend/.env.local
+frontend/node_modules
+frontend/.next
+frontend/build
+ml_service/models/*.pth
+ml_service/models/*.dat
+ml_service/models/*.onnx

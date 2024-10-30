@@ -14,4 +14,3 @@ python-dateutil
 facenet_pytorch
 PyJWT
 gdown
-dlib

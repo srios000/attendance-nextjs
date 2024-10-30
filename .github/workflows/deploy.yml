@@ -35,22 +35,25 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies
+      - name: Debug directory structure
         run: |
-          cd frontend
-          npm install
+          pwd
+          ls -la
+          ls -la frontend/
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm install
 
       - name: Install Vercel CLI
         run: npm install -g vercel
 
       - name: Deploy to Vercel
+        working-directory: ./frontend
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          NEXT_PUBLIC_API_URL: ${{ needs.deploy-backend.outputs.backend_url }}
         run: |
-          cd frontend
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --env NEXT_PUBLIC_API_URL=${{ needs.deploy-backend.outputs.backend_url }}
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --env NEXT_PUBLIC_API_URL=${{ needs.deploy-backend.outputs.backend_url }}

@@ -18,3 +18,4 @@ httpx
 requests
 PyJWT
 gdown
+logging

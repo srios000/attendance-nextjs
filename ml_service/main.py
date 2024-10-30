@@ -30,6 +30,10 @@ import asyncio
 from functools import partial
 from dateutil import parser
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
+
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -63,13 +67,45 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def load_model(pretrained=True):
-    model = FaceNetModel()
-    if pretrained:
-        # checkpoint = torch.load('./models/models_0711.pth')
-        # checkpoint = torch.load('./models/model920-6be7e3e9.pth')
-        checkpoint = torch.load('./models/models_0821_50.pth')
-        model.load_state_dict(checkpoint['state_dict'])
-    return model
+    try:
+        model = FaceNetModel()
+        if pretrained:
+            logging.info("Loading model weights...")
+            
+            try:
+                checkpoint = torch.load(
+                    './models/models_0821_50.pth',
+                    weights_only=True,
+                    map_location=device
+                )
+                logging.info("Successfully loaded model with weights_only=True")
+            except Exception as e:
+                logging.warning(f"Failed to load with weights_only=True: {e}")
+                logging.info("Attempting to load model without weights_only...")
+                
+                checkpoint = torch.load(
+                    './models/models_0821_50.pth',
+                    map_location=device
+                )
+                logging.info("Successfully loaded model without weights_only")
+
+            if isinstance(checkpoint, dict):
+                if 'state_dict' in checkpoint:
+                    model.load_state_dict(checkpoint['state_dict'])
+                else:
+                    model.load_state_dict(checkpoint)
+            else:
+                raise ValueError("Unexpected checkpoint format")
+
+            logging.info("Model weights loaded successfully")
+        
+        model = model.to(device)
+        model.eval()
+        return model
+
+    except Exception as e:
+        logging.error(f"Error in load_model: {str(e)}")
+        raise RuntimeError(f"Failed to load model: {str(e)}")
 
 # def load_model(pretrained=True):
 #     model = FaceNetModel()
@@ -78,7 +114,14 @@ def load_model(pretrained=True):
 #         model.load_state_dict(checkpoint)
 #     return model
 
-model = load_model()
+try:
+    logging.info(f"Initializing model on device: {device}")
+    model = load_model()
+    logging.info("Model initialized successfully")
+except Exception as e:
+    logging.error(f"Fatal error initializing model: {str(e)}")
+    raise
+
 model = model.to(device)
 model.eval()
 

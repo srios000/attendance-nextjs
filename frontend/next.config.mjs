@@ -14,14 +14,15 @@ const nextConfig = {
     async rewrites() {
         return [
             {
-                source: '/api/:path*',
-                destination: 
-                process.env.NODE_ENV === 'development'
+                source: '/api/(?!auth/.*|trpc/.*|_next/.*|_proxy/.*|_auth/.*|_vercel/.*|_static/.*|_next/static|_next/image|_next/webpack-hmr)/:path*',
+                destination: process.env.NODE_ENV === 'development'
                     ? 'http://localhost:8000/api/:path*'
-                    : process.env.NEXT_PUBLIC_API_URL + '/api/:path*',
+                    : `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/:path*`,
             },
         ]
     },
+        
+
 
     images: {
         remotePatterns: [

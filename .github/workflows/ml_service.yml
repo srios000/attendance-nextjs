@@ -1,0 +1,27 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'ml_service/**'
+      - '.github/workflows/ml_service.yml'
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      backend_url: ${{ steps.get_url.outputs.url }} 
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          cd ml_service
+          railway up --service "backend-api" --detach

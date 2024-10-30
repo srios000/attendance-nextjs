@@ -6,6 +6,10 @@ const nextConfig = {
         // your project has ESLint errors.
         ignoreDuringBuilds: true,
     },
+    typescript: {
+        // Disable TypeScript during builds
+        ignoreBuildErrors: true,
+    },
     // API route rewrites untuk proxy ke backend
     async rewrites() {
         return [

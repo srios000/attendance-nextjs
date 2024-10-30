@@ -9,6 +9,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import {ThemeProvider} from 'next-themes'
 import { LicenseInfo } from '@mui/x-license';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 // import SearchBar from '@/components/SearchBar';
 // import CMSSidebar from './cms/components/CMSSidebar';
 import CMSNavbar from './cms/components/Navbar';
@@ -94,6 +95,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
           </ThemeProvider>
       </SessionProvider>
       <MuiXLicense />
+      <SpeedInsights />
     </>
   );
 }

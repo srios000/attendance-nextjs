@@ -37,7 +37,7 @@ RUN mkdir -p models && \
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # Run app with shell script
 COPY start.sh /app/start.sh

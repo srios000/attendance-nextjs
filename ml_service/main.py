@@ -32,6 +32,7 @@ from dateutil import parser
 
 import logging
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
@@ -113,17 +114,6 @@ def load_model(pretrained=True):
 #         checkpoint = torch.load('./models/model_weights.pth')
 #         model.load_state_dict(checkpoint)
 #     return model
-
-try:
-    logging.info(f"Initializing model on device: {device}")
-    model = load_model()
-    logging.info("Model initialized successfully")
-except Exception as e:
-    logging.error(f"Fatal error initializing model: {str(e)}")
-    raise
-
-model = model.to(device)
-model.eval()
 
 def correct_orientation(image):
     try:
@@ -426,7 +416,7 @@ origins = [
     "http://localhost:3000",
     "https://attendance-app-frontend-18592.vercel.app",
     
-    #  "http://localhost:8000",# React app in dev mode
+    #  "http://localhost:8080",# React app in dev mode
 ]
 
 app.add_middleware(
@@ -437,7 +427,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-base_url = "http://localhost:8000"
+base_url = "http://localhost:8080"
 
 @app.on_event("startup")
 async def migrate_groups():
@@ -461,16 +451,27 @@ async def health_check():
             "status": "healthy",
             "model": "loaded",
             "device": str(device),
-            "port": os.environ.get("PORT", "8000")
+            "port": os.environ.get("PORT", "8080")
         }
     except Exception as e:
-        logging.error(f"Health check failed: {str(e)}")
+        logger.error(f"Health check failed: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Health check failed: {str(e)}"
         )
 
-app = FastAPI()
+logger.info("Initializing model...")
+
+try:
+    logging.info(f"Initializing model on device: {device}")
+    model = load_model()
+    logging.info("Model initialized successfully")
+except Exception as e:
+    logging.error(f"Fatal error initializing model: {str(e)}")
+    raise
+
+model = model.to(device)
+model.eval()
 
 TEMP_DIR = "temp_files"
 os.makedirs(TEMP_DIR, exist_ok=True)

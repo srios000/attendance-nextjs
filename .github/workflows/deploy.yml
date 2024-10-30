@@ -21,31 +21,31 @@ jobs:
           cd ml_service
           railway up --service "backend-api" --detach
 
-          deploy-frontend:
-            runs-on: ubuntu-latest
-            needs: deploy-backend
-            environment: production
-            steps:
-              - uses: actions/checkout@v2
-        
-              - name: Setup Node.js
-                uses: actions/setup-node@v2
-                with:
-                  node-version: '18'
-        
-              - name: Install dependencies
-                run: |
-                  cd frontend
-                  npm install
-        
-              - name: Install Vercel CLI
-                run: npm install -g vercel
-        
-              - name: Deploy to Vercel
-                env:
-                  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-                  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-                  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-                run: |
-                  cd frontend
-                  vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+    environment: production
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          cd frontend
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}

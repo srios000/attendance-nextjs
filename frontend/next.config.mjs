@@ -10,11 +10,16 @@ const nextConfig = {
         // Disable TypeScript during builds
         ignoreBuildErrors: true,
     },
-    // API route rewrites untuk proxy ke backend
     async rewrites() {
         return [
             {
-                source: '/api/(?!auth/.*|trpc/.*|_next/.*|_proxy/.*|_auth/.*|_vercel/.*|_static/.*|_next/static|_next/image|_next/webpack-hmr)/:path*',
+                // Handle authentication routes separately
+                source: '/api/auth/:path*',
+                destination: '/api/auth/:path*'  // Keep auth routes internal
+            },
+            {
+                // Forward all other API routes to backend
+                source: '/api/:path*',
                 destination: process.env.NODE_ENV === 'development'
                     ? 'http://localhost:8000/api/:path*'
                     : `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/:path*`,

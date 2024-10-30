@@ -11,19 +11,24 @@ const nextConfig = {
         ignoreBuildErrors: true,
     },
     async rewrites() {
+        const apiUrl = process.env.NODE_ENV === 'development' 
+            ? 'http://localhost:8000'
+            : process.env.NEXT_PUBLIC_BACKEND_API_URL
+
         return [
             {
-                // Handle authentication routes separately
-                source: '/api/auth/:path*',
-                destination: '/api/auth/:path*'  // Keep auth routes internal
-            },
-            {
-                // Forward all other API routes to backend
-                source: '/api/:path*',
-                destination: process.env.NODE_ENV === 'development'
-                    ? 'http://localhost:8000/api/:path*'
-                    : `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/:path*`,
-            },
+                source: '/api/:slug*',
+                destination: `${apiUrl}/api/:slug*`,
+                has: [
+                    {
+                        type: 'query',
+                        key: 'auth',
+                        value: {
+                            not: 'true'
+                        }
+                    }
+                ]
+            }
         ]
     },
         

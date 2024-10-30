@@ -1,4 +1,4 @@
-name: Deploy Fullstack App
+name: Deploy Frontend
 
 on:
     push:

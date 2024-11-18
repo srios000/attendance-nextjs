@@ -8,6 +8,17 @@ import { StaticDateRangePicker } from '@mui/x-date-pickers-pro/StaticDateRangePi
 import { PickersShortcutsItem } from '@mui/x-date-pickers/PickersShortcuts';
 import { DateRange } from '@mui/x-date-pickers-pro/models';
 import { useSession } from 'next-auth/react';
+import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+// import autoTable from 'jspdf-autotable'
+import 'jspdf-autotable';
+
+// Add type definition for autoTable
+declare module 'jspdf' {
+    interface jsPDF {
+        autoTable: (options) => jsPDF;
+    }
+}
 
 dayjs.extend(isBetween);
 
@@ -355,6 +366,88 @@ const AttendanceTable = ({ userHasAccess }: { userHasAccess: boolean }) => {
         </div>
     );
 
+    const exportToCSV = () => {
+        const csvData = filteredData.map(item => ({
+            Name: item.name,
+            Group: item.group,
+            Date: dayjs(item.timestamp).format('YYYY-MM-DD'),
+            Time: dayjs(item.timestamp).format('HH:mm:ss'),
+            Status: item.attended ? 'Present' : 'Absent'
+        }));
+
+        const csvString = [
+            ['Name', 'Group', 'Date', 'Time', 'Status'],
+            ...csvData.map(row => Object.values(row))
+        ].map(row => row.join(',')).join('\n');
+
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `attendance_log_${dayjs().format('YYYY-MM-DD')}.csv`;
+        link.click();
+    };
+
+    const exportToXLSX = () => {
+        const xlsxData = filteredData.map(item => ({
+            Name: item.name,
+            Group: item.group,
+            Date: dayjs(item.timestamp).format('YYYY-MM-DD'),
+            Time: dayjs(item.timestamp).format('HH:mm:ss'),
+            Status: item.attended ? 'Present' : 'Absent'
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(xlsxData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Attendance Log');
+        XLSX.writeFile(wb, `attendance_log_${dayjs().format('YYYY-MM-DD')}.xlsx`);
+    };
+
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+        
+        const tableData = filteredData.map(item => [
+            item.name,
+            item.group,
+            dayjs(item.timestamp).format('YYYY-MM-DD'),
+            dayjs(item.timestamp).format('HH:mm:ss'),
+            item.attended ? 'Present' : 'Absent'
+        ]);
+
+        doc.autoTable({
+            head: [['Name', 'Group', 'Date', 'Time', 'Status']],
+            body: tableData,
+            theme: 'grid',
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: [66, 139, 202] }
+        });
+
+        doc.save(`attendance_log_${dayjs().format('YYYY-MM-DD')}.pdf`);
+    };
+
+    // Add export buttons section before the table
+    const ExportButtons = () => (
+        <div className="flex gap-2 mb-4">
+            <button
+                onClick={exportToCSV}
+                className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors"
+            >
+                <i className="fas fa-file-csv mr-2"></i>Export CSV
+            </button>
+            <button
+                onClick={exportToXLSX}
+                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+            >
+                <i className="fas fa-file-excel mr-2"></i>Export XLSX
+            </button>
+            <button
+                onClick={exportToPDF}
+                className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-colors"
+            >
+                <i className="fas fa-file-pdf mr-2"></i>Export PDF
+            </button>
+        </div>
+    );
+
     return (
         <>
             {userHasAccess ? (
@@ -397,28 +490,9 @@ const AttendanceTable = ({ userHasAccess }: { userHasAccess: boolean }) => {
                                 )}
                             </button>
                             {showDatePicker && <DatePickerWrapper />}
-                            {/* {showDatePicker && (
-                                <div className='text-white'>
-                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <StaticDateRangePicker
-                                            sx={{ height: 300, overflowY: 'scroll', justifyContent: 'center' }}
-                                            disableFuture
-                                            slotProps={{
-                                                shortcuts: {
-                                                    items: shortcutsItems,
-                                                },
-                                                actionBar: { actions: [] },
-                                            }}
-                                            calendars={1}
-                                            value={selectedDate}
-                                            onChange={(newValue) => setSelectedDate(newValue)}
-                                            className="shadow-md dark:bg-sky-800 bg-sky-500 mb-4"
-                                        />
-                                    </LocalizationProvider>
-                                </div>
-                            )} */}
 
-                            {/* Table Section */}
+                            <ExportButtons />
+
                             <div className="overflow-x-auto mt-1">
                                 <table className="min-w-full bg-white dark:bg-gray-800">
                                     <thead className="bg-gray-50 dark:bg-gray-700">
@@ -441,6 +515,7 @@ const AttendanceTable = ({ userHasAccess }: { userHasAccess: boolean }) => {
                                                 sortConfig={sortConfig} 
                                                 onSort={requestSort} 
                                             />
+                                            <th className="py-2 px-6">Time</th>
                                             <th className="py-2 px-6">Attendance</th>
                                             <th className="py-2 px-6">Action</th>
                                         </tr>
@@ -462,6 +537,9 @@ const AttendanceTable = ({ userHasAccess }: { userHasAccess: boolean }) => {
                                                     <td className="py-2 px-6 text-center">{log.group}</td>
                                                     <td className="py-2 px-6 text-center">
                                                         {dayjs(log.timestamp).format('YYYY-MM-DD')}
+                                                    </td>
+                                                    <td className="py-2 px-6 text-center">
+                                                        {dayjs(log.timestamp).format('HH:mm:ss')}
                                                     </td>
                                                     <td className="py-2 px-6 text-center">
                                                         {log.attended ? 'Present' : 'Absent'}

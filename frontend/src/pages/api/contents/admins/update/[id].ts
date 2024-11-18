@@ -145,7 +145,7 @@ import bcrypt from 'bcryptjs';
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Check for internal request header
-    const internalRequestToken = req.headers['x-internal-request'];
+    const internalRequestToken = req.headers['x-internal-request-edit-user'];
     if (internalRequestToken !== process.env.NEXT_PUBLIC_ADMIN_ACCESS_HEADER) {
         return res.status(403).json({ success: false, error: 'Forbidden' });
     }
@@ -183,3 +183,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(405).end(`Method ${req.method} Not Allowed`);
     }
 }
+

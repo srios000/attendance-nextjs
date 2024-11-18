@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface SingleSelectDropdownProps {
     currentRole: string;
@@ -10,51 +10,126 @@ interface SingleSelectDropdownProps {
 const SingleSelectDropdown = ({ currentRole, allRoles, onChange, disabled }: SingleSelectDropdownProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState(currentRole);
+    const [searchTerm, setSearchTerm] = useState('');
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+                setSearchTerm('');
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Focus search input when dropdown opens
+    useEffect(() => {
+        if (isOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [isOpen]);
+
+    const filteredRoles = allRoles.filter(role =>
+        role.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const handleRoleChange = (role: string) => {
         setSelectedRole(role);
         onChange(role);
         setIsOpen(false);
+        setSearchTerm('');
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent, role?: string) => {
+        if (e.key === 'Enter' && role) {
+            handleRoleChange(role);
+        }
+        if (e.key === 'Escape') {
+            setIsOpen(false);
+            setSearchTerm('');
+        }
     };
 
     return (
-        <div className="relative z-40 inline-block text-left">
-            <div>
-                <button
-                    type="button"
-                    className="inline-flex justify-center w-full rounded-md border-2 disabled:border-red-500 border-gray-300 shadow-sm px-4 py-2 bg-white dark:bg-slate-800 dark:text-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-500 disabled:cursor-not-allowed focus:outline-none"
-                    onClick={() => setIsOpen(!isOpen)}
-                    disabled={disabled}
-                >
+        <div ref={dropdownRef} className="relative inline-block text-left w-64">
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                disabled={disabled}
+                className={`
+                    w-full px-4 py-2.5 text-left inline-flex items-center justify-between
+                    rounded-lg border transition-all duration-200
+                    ${disabled 
+                        ? 'bg-gray-100 border-gray-200 cursor-not-allowed text-gray-400'
+                        : 'bg-white border-gray-200 hover:border-blue-500 text-gray-700 hover:bg-gray-50'
+                    }
+                    ${isOpen ? 'border-blue-500 ring-2 ring-blue-100' : ''}
+                    dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200
+                    dark:hover:bg-gray-700 focus:outline-none
+                `}
+            >
+                <span className="truncate">
                     {selectedRole || "Select Role"}
-                    <svg
-                        className="-mr-1 ml-2 h-5 w-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        aria-hidden="true"
-                    >
-                        <path
-                            fillRule="evenodd"
-                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                        />
-                    </svg>
-                </button>
-            </div>
+                </span>
+                <svg
+                    className={`w-4 h-4 ml-2 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
 
             {isOpen && (
-                <div className="origin-top-right z-50 absolute right-0 mt-2 max-w-28 rounded-md shadow-lg bg-white dark:text-white dark:bg-slate-800 ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <div className="py-1 divide-y divide-slate-700 ">
-                        {allRoles.map((role) => (
-                            <button
-                                key={role}
-                                onClick={() => handleRoleChange(role)}
-                                className="w-full px-4 py-2 text-sm text-gray-700 dark:text-white hover:dark:text-slate-600 bg-slate-800 z-50 hover:bg-gray-100 hover:text-gray-900"
-                            >
-                                {role.charAt(0).toUpperCase() + role.slice(1)}
-                            </button>
-                        ))}
+                <div className="absolute z-50 w-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                    <div className="p-2">
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyDown={(e) => handleKeyDown(e)}
+                            placeholder="Search roles..."
+                            className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 
+                                     focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500
+                                     dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200
+                                     dark:placeholder-gray-400"
+                        />
+                    </div>
+
+                    <div className="max-h-60 overflow-y-auto">
+                        {filteredRoles.length > 0 ? (
+                            <div className="py-1">
+                                {filteredRoles.map((role) => (
+                                    <button
+                                        key={role}
+                                        onClick={() => handleRoleChange(role)}
+                                        onKeyDown={(e) => handleKeyDown(e, role)}
+                                        className={`
+                                            w-full px-4 py-2 text-sm text-left transition-colors
+                                            hover:bg-blue-50 hover:text-blue-700
+                                            dark:hover:bg-gray-700
+                                            ${selectedRole === role 
+                                                ? 'bg-blue-50 text-blue-700 dark:bg-gray-700 dark:text-blue-400'
+                                                : 'text-gray-700 dark:text-gray-200'
+                                            }
+                                        `}
+                                    >
+                                        {role}
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+                                No roles found
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

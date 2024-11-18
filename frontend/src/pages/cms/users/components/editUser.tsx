@@ -63,7 +63,7 @@ const EditUserModal = ({ isOpen, onClose, onUserUpdated, user }: EditUserModalPr
         try {
             const response = await fetch(`/api/contents/admins/update/${user._id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-internal-request': 'true', 'x-internal-request-reset-password': process.env.NEXT_PUBLIC_ADMIN_ACCESS_HEADER || '' },
                 body: JSON.stringify(resetPasswordBody),
             });
 
@@ -107,7 +107,8 @@ const EditUserModal = ({ isOpen, onClose, onUserUpdated, user }: EditUserModalPr
         try {
             const response = await fetch(`/api/contents/admins/update/${user._id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'x-internal-request': 'true' },
+                //@ts-expect-error add user needs two headers, x-internal-request and x-internal-request-add-user
+                headers: { 'Content-Type': 'application/json', 'x-internal-request': true, 'x-internal-request-edit-user': process.env.NEXT_PUBLIC_ADMIN_ACCESS_HEADER || '' },
                 body: JSON.stringify(updatedUser),
             });
     

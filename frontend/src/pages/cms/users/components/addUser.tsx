@@ -48,6 +48,7 @@ const AddUserModal = ({ isOpen, onClose, onRefresh }: AddUserModalProps) => {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        // console.log('Header value:', process.env.NEXT_PUBLIC_ADMIN_ACCESS_HEADER);
 
         if (!validateInputs()) {
             Swal.fire('Error!', 'Please fill all the fields.', 'error');
@@ -68,7 +69,8 @@ const AddUserModal = ({ isOpen, onClose, onRefresh }: AddUserModalProps) => {
         try {
             const response = await fetch('/api/contents/admins/add', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-internal-request': process.env.NEXT_PUBLIC_ADMIN_ACCESS_HEADER || '' },
+                //@ts-expect-error add user needs two headers, x-internal-request and x-internal-request-add-user
+                headers: { 'Content-Type': 'application/json', 'x-internal-request': true, 'x-internal-request-add-user': process.env.NEXT_PUBLIC_ADMIN_ACCESS_HEADER || '' },
                 body: JSON.stringify(newUser),
             });
     

@@ -124,7 +124,8 @@ const UsersTable = () => {
                     const response = await fetch(`/api/contents/admins/delete/${id}`, {
                         method: 'DELETE',
                         headers: {
-                            'x-internal-request': process.env.NEXT_PUBLIC_ADMIN_ACCESS_HEADER || ''
+                            'x-internal-request': 'true',
+                            'x-internal-request-delete-user': process.env.NEXT_PUBLIC_ADMIN_ACCESS_HEADER || ''
                         }
                     });
 
